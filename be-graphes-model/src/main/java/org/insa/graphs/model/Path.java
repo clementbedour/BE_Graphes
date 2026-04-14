@@ -250,11 +250,18 @@ public class Path {
      * every arc.
      *
      * @return Minimum travel time to travel this path (in seconds).
-     * @deprecated Need to be implemented.
+     * deprecated Need to be implemented.
      */
     public double getMinimumTravelTime() {
-        // TODO:
-        return 0;
+        double min =0;
+        if (isValid()) {
+            for(Arc arc : this.arcs){
+                min = min + arc.getMinimumTravelTime();
+            }
+            return min;
+        }
+        else {
+            return -1;
+        }
     }
-
 }
