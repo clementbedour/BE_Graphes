@@ -188,8 +188,14 @@ public class Path {
      * @return true if the path is valid, false otherwise.
      * @deprecated Need to be implemented.
      */
-    public boolean isValid() {
+      public boolean isValid() {
         // TODO:
+        if (this.arcs.isEmpty()) {
+            return true;
+        }
+        else{
+
+        }
         return false;
     }
 
