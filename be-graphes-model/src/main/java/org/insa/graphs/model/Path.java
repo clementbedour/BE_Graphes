@@ -98,6 +98,8 @@ public class Path {
      *
      * @param graph Graph containing the path.
      */
+
+
     public Path(Graph graph) {
         this.graph = graph;
         this.origin = null;
@@ -208,11 +210,15 @@ public class Path {
      * @param speed Speed to compute the travel time.
      * @return Time (in seconds) required to travel this path at the given speed (in
      *         kilometers-per-hour).
-     * @deprecated Need to be implemented.
+     * Il y avait le truc pour que ça marche pas.
      */
     public double getTravelTime(double speed) {
         // TODO:
-        return 0;
+        int travelTime = 0;
+        for (Arc arc : this.arcs) {
+            travelTime += arc.getTravelTime(speed);
+        }
+        return travelTime;
     }
 
     /**

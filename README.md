@@ -2,8 +2,6 @@
 
 This is an INSA local copy of [Mikael CAPELLE's repository](https://gitea.typename.fr/INSA/be-graphes).
 
-Test
-
 ## How to start?
 
 1. On your favorite platform, create a new empty repository of yours.
