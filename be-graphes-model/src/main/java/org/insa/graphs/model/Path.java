@@ -25,12 +25,34 @@ public class Path {
      * @return A path that goes through the given list of nodes.
      * @throws IllegalArgumentException If the list of nodes is not valid, i.e. two
      *         consecutive nodes in the list are not connected in the graph.
-     * @deprecated Need to be implemented.
+     * eprecated Need to be implemented.
      */
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
-        // TODO:
+        for (Node ElementNode : nodes){
+            //on va regarder les diff chemins du noeud
+            Arc voulu = null;
+            float min=0.0f;
+
+            for(Arc  DiffChemin : ElementNode.getSuccessors()){
+                if (DiffChemin.getDestination()== ElementNode) {//regarder si bon successor
+                    if (min ==0.0f){ //premier bon successor donc init min et voulu
+                        min = DiffChemin.getLength()*(float)DiffChemin.getMinimumTravelTime();
+                        voulu = DiffChemin;
+                    }
+
+                    if (min > DiffChemin.getLength()*(float)DiffChemin.getMinimumTravelTime()) {//alors comparer si chemin le plus petit
+                        voulu = DiffChemin;
+                    }
+                }
+                arcs.add(voulu);
+            }
+            if (ElementNode.getSuccessors()==null) {
+                break;
+            }
+        //verifier si on est à la fin 
+        }
         return new Path(graph, arcs);
     }
 
@@ -208,7 +230,6 @@ public class Path {
      * deprecated Need to be implemented.
      */
       public boolean isValid() {
-        // TODO:
         Node node = this.origin;
         if (this.arcs.isEmpty()) {
             return true;
@@ -256,7 +277,6 @@ public class Path {
      * Il y avait le truc pour que ça marche pas.
      */
     public double getTravelTime(double speed) {
-        // TODO:
         int travelTime = 0;
         for (Arc arc : this.arcs) {
             travelTime += arc.getTravelTime(speed);
