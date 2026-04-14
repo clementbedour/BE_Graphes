@@ -197,11 +197,20 @@ public class Path {
      * Compute the length of this path (in meters).
      *
      * @return Total length of the path (in meters).
-     * @deprecated Need to be implemented.
+     * @return Total length of the path (in meters).
+     * //deprecated Need to be implemented.
      */
     public float getLength() {
-        // TODO:
-        return 0;
+        float taille =0.0f;
+        if (isValid()) {
+            for (Arc arc : this.arcs) {
+                taille = taille + arc.getLength();
+            }
+            return taille;
+        }
+        else {
+            return -1.0f;
+        }
     }
 
     /**
