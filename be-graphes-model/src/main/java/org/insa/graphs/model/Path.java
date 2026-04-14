@@ -48,9 +48,28 @@ public class Path {
     public static Path createShortestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>();
+        List<Arc> arcs_prov = new ArrayList<Arc>();
+        Arc arc_prov = null;
+        double mini = 0;
         // TODO:
-        return new Path(graph, arcs);
+        for(Node debut : nodes){
+            for (Arc arc : debut.getSuccessors()){
+                if(arc.getDestination() == nodes.get(nodes.indexOf(debut)+1)){
+                    arcs_prov.add(arc);
+                }
+            }
+            arc_prov = arcs_prov.get(0);
+            mini = arc_prov.getTravelTime(this.speed);
+            for (Arc arc : arcs_prov){
+                if arc.getTravelTime(this.speed) < mini {
+                    arc_prov = arc;
+                    mini = arc.getTravelTime(this.speed);
+                }
+            }
+            arcs.add(arc_prov);
     }
+    return new Path(graph, arcs);
+}
 
     /**
      * Concatenate the given paths.
