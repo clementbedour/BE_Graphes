@@ -186,16 +186,25 @@ public class Path {
      * </ul>
      *
      * @return true if the path is valid, false otherwise.
-     * @deprecated Need to be implemented.
+     * deprecated Need to be implemented.
      */
       public boolean isValid() {
         // TODO:
+        Node node = this.origin;
         if (this.arcs.isEmpty()) {
             return true;
         }
-        else{
-
+        if(node == null){
+            return true;
         }
+        for (Arc arc : this.arcs) {
+                if (arc.getOrigin() == node) {
+                    node = arc.getDestination();
+                }
+                else{
+                    return false;
+                }
+            }
         return false;
     }
 
