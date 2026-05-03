@@ -27,34 +27,40 @@ public class Path {
      *         consecutive nodes in the list are not connected in the graph.
      * eprecated Need to be implemented.
      */
-    public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
-            throws IllegalArgumentException {
-        List<Arc> arcs = new ArrayList<Arc>();
-        for (Node ElementNode : nodes){
-            //on va regarder les diff chemins du noeud
-            Arc voulu = null;
-            float min=0.0f;
+    public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes) throws IllegalArgumentException {
+    List<Arc> arcs = new ArrayList<Arc>(); //Liste final
+    for (int i = 0; i < nodes.size() - 1; i++) {
+        Node ElementNode = nodes.get(i);
+        Arc voulu = null;   // Meilleur arc trouvé pour cette paire
+        double min = 0;   // Temps minimum correspondant
 
-            for(Arc  DiffChemin : ElementNode.getSuccessors()){
-                if (DiffChemin.getDestination()== ElementNode) {//regarder si bon successor
-                    if (min ==0.0f){ //premier bon successor donc init min et voulu
-                        min = DiffChemin.getLength()*(float)DiffChemin.getMinimumTravelTime();
-                        voulu = DiffChemin;
-                    }
+        // Parcours arcs sortants du noeud courant
+        for (Arc DiffChemin : ElementNode.getSuccessors()) {
 
-                    if (min > DiffChemin.getLength()*(float)DiffChemin.getMinimumTravelTime()) {//alors comparer si chemin le plus petit
-                        voulu = DiffChemin;
-                    }
+            // Garde arcs qui mene au noeud suivant
+            if (DiffChemin.getDestination() == nodes.get(i + 1)) {
+                if (voulu == null) { //init
+                    voulu = DiffChemin;
+                    min = DiffChemin.getMinimumTravelTime();
                 }
-                arcs.add(voulu);
+
+                // Si arc plus rapide, on remplace
+                if (min > DiffChemin.getMinimumTravelTime()) {
+                    voulu = DiffChemin;
+                    min = DiffChemin.getMinimumTravelTime();
+                }
             }
-            if (ElementNode.getSuccessors()==null) {
-                break;
-            }
-        //verifier si on est à la fin 
         }
-        return new Path(graph, arcs);
+
+        // Si aucun arc relie les deux noeuds, Exception
+        if (voulu == null) throw new IllegalArgumentException(
+            "Pas d'arc entre " + ElementNode + " et " + nodes.get(i + 1));
+
+        // Ajout meilleur arc au chemin final
+        arcs.add(voulu);
     }
+    return new Path(graph, arcs);
+}
 
     /**
      * Create a new path that goes through the given list of nodes (in order), choosing
@@ -65,30 +71,41 @@ public class Path {
      * @return A path that goes through the given list of nodes.
      * @throws IllegalArgumentException If the list of nodes is not valid, i.e. two
      *         consecutive nodes in the list are not connected in the graph.
-     * @deprecated Need to be implemented.
+     * deprecated Need to be implemented.
      */
-    public static Path createShortestPathFromNodes(Graph graph, List<Node> nodes)
-            throws IllegalArgumentException {
-        List<Arc> arcs = new ArrayList<Arc>();
-        List<Arc> arcs_prov = new ArrayList<Arc>();
-        Arc arc_prov = null;
-        double mini = 0;
-        // TODO:
-        for(Node debut : nodes){
-            for (Arc arc : debut.getSuccessors()){
-                if(arc.getDestination() == nodes.get(nodes.indexOf(debut)+1)){
-                    arcs_prov.add(arc);
-                }
+    public static Path createShortestPathFromNodes(Graph graph, List<Node> nodes) throws IllegalArgumentException {
+    List<Arc> arcs = new ArrayList<Arc>(); //Liste final
+    List<Arc> arcs_prov = new ArrayList<Arc>(); //Liste tmp
+    Arc arc_prov = null;
+    double min = 0;
+
+    for (int i = 0; i < nodes.size() - 1; i++) {
+        Node debut = nodes.get(i); 
+        arcs_prov.clear(); //On vide la liste
+
+        //Collecte noeud courant vers noeud suivant
+        for (Arc arc : debut.getSuccessors()) {
+            if (arc.getDestination() == nodes.get(i + 1)) {
+                arcs_prov.add(arc);
             }
-            arc_prov = arcs_prov.get(0);
-            mini = arc_prov.getTravelTime(this.speed);
-            for (Arc arc : arcs_prov){
-                if arc.getTravelTime(this.speed) < mini {
-                    arc_prov = arc;
-                    mini = arc.getTravelTime(this.speed);
-                }
+        }
+
+        // Si aucun arc ne relie les deux noeuds, le chemin est invalide
+        if (arcs_prov.isEmpty()) throw new IllegalArgumentException(
+            "Pas d'arc entre " + debut + " et " + nodes.get(i + 1));
+
+        //On init avec le premier arc
+        arc_prov = arcs_prov.get(0);
+        min = arc_prov.getLength();
+
+        // On regarde tout les potentiels
+        for (Arc arc : arcs_prov) {
+            if (arc.getLength() < min) {
+                arc_prov = arc;
+                min = arc.getLength();
             }
-            arcs.add(arc_prov);
+        }
+        arcs.add(arc_prov);
     }
     return new Path(graph, arcs);
 }
@@ -229,23 +246,23 @@ public class Path {
      * @return true if the path is valid, false otherwise.
      * deprecated Need to be implemented.
      */
-      public boolean isValid() {
+    public boolean isValid() {
         Node node = this.origin;
         if (this.arcs.isEmpty()) {
-            return true;
+            return true; //chemin sans arcs valide (noeud unique)
         }
         if(node == null){
-            return true;
+            return true; //chemin sans origine valide (chemin vide)
         }
         for (Arc arc : this.arcs) {
                 if (arc.getOrigin() == node) {
                     node = arc.getDestination();
                 }
                 else{
-                    return false;
+                    return false; //origine ne correspond pas 
                 }
             }
-        return false;
+        return true; //tout les arcs sont enchainés donc OK
     }
 
     /**
