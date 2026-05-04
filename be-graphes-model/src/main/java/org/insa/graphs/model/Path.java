@@ -30,6 +30,17 @@ public class Path {
     public static Path createFastestPathFromNodes(Graph graph, List<Node> nodes)
             throws IllegalArgumentException {
         List<Arc> arcs = new ArrayList<Arc>(); // Liste final
+
+        // FIX TEST
+        if (nodes.size() == 0) {
+            return new Path(graph);
+        }
+
+        else if (nodes.size() == 1) {
+            return new Path(graph, nodes.get(0));
+        }
+
+
         for (int i = 0; i < nodes.size() - 1; i++) {
             Node ElementNode = nodes.get(i);
             Arc voulu = null; // Meilleur arc trouvé pour cette paire
@@ -81,6 +92,15 @@ public class Path {
         List<Arc> arcs_prov = new ArrayList<Arc>(); // Liste tmp
         Arc arc_prov = null;
         double min = 0;
+
+        // FIX TEST
+        if (nodes.size() == 0) {
+            return new Path(graph);
+        }
+
+        else if (nodes.size() == 1) {
+            return new Path(graph, nodes.get(0));
+        }
 
         for (int i = 0; i < nodes.size() - 1; i++) {
             Node debut = nodes.get(i);

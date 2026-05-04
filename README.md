@@ -37,6 +37,6 @@ This is an INSA local copy of [Mikael CAPELLE's repository](https://gitea.typena
 <!-- 
 Erreur test : 
 GetTravelTime FIX
-CreateFastestPathFromNodes
-CreateShortestPathFromNodes
+CreateFastestPathFromNodes FIX
+CreateShortestPathFromNodes FIX
 -->
