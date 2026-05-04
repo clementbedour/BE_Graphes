@@ -33,3 +33,10 @@ This is an INSA local copy of [Mikael CAPELLE's repository](https://gitea.typena
     git push
     ```
 
+
+<!-- 
+Erreur test : 
+GetTravelTime FIX
+CreateFastestPathFromNodes
+CreateShortestPathFromNodes
+-->
