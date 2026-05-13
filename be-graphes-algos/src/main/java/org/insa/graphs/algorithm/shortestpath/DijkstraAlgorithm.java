@@ -28,6 +28,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         BinaryHeap<Label> tasLabel = new BinaryHeap<>();
         List<Node> nodes = data.getGraph().getNodes();
 
+        notifyOriginProcessed(data.getOrigin());
         for(int i = 0; i < taille; i++){
             Node noeudCourant = nodes.get(i);
             tabLabel[i] = new Label(noeudCourant, false, Integer.MAX_VALUE, null);
@@ -37,11 +38,14 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             }
         }
         Label min;
-        while (!tasLabel.isEmpty()){
+        min = tasLabel.findMin();
+        while (!tasLabel.isEmpty() && min.getSommet()!=data.getDestination() ){
             min = tasLabel.deleteMin();
             min.setMarque(true);
+            //notifyNodeMarked(min.getSommet());
             for (Arc arc : min.getSommet().getSuccessors()){
                 if(data.isAllowed(arc)){
+                    notifyNodeReached(arc.getDestination());
                     Label recherche = tabLabel[arc.getDestination().getId()];
                     double nvCout = min.getCost() + data.getCost(arc);
                     if (nvCout < recherche.getCost()) {
