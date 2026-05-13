@@ -18,7 +18,6 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         // retrieve data from the input problem (getInputData() is inherited from the
         // parent class ShortestPathAlgorithm)
         final ShortestPathData data = getInputData();
-
         // variable that will contain the solution of the shortest path problem
         ShortestPathSolution solution = null;
 
