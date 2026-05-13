@@ -1,9 +1,9 @@
 package org.insa.graphs.algorithm.shortestpath;
 
 import org.insa.graphs.algorithm.AbstractInputData.Mode;
+import org.insa.graphs.algorithm.AbstractSolution;
 import org.insa.graphs.model.Arc;
 import org.insa.graphs.model.Path;
-import org.insa.graphs.algorithm.AbstractSolution;
 
 public class ShortestPathSolution extends AbstractSolution {
 
