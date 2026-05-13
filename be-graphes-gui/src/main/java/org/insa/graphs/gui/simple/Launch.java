@@ -5,14 +5,23 @@ import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.ObjectInputFilter;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.insa.graphs.algorithm.ArcInspector;
+import org.insa.graphs.algorithm.AbstractSolution;
+import org.insa.graphs.algorithm.ArcInspectorFactory;
+import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
+import org.insa.graphs.algorithm.shortestpath.ShortestPathSolution;
 import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
 import org.insa.graphs.model.Graph;
 import org.insa.graphs.model.Path;
+import org.insa.graphs.model.Node;
 import org.insa.graphs.model.io.BinaryGraphReader;
 import org.insa.graphs.model.io.GraphReader;
 import org.insa.graphs.model.io.PathReader;
@@ -57,23 +66,40 @@ public class Launch {
         try (final GraphReader reader = new BinaryGraphReader(new DataInputStream(
                 new BufferedInputStream(new FileInputStream(mapName))))) {
 
-            // TODO: read the graph
-            graph = null;
+            // TODO: read the graph OK
+            graph = reader.read();
         }
 
         // create the drawing
         final Drawing drawing = createDrawing();
 
-        // TODO: draw the graph on the drawing
+        // TODO: draw the graph on the drawing OK
+        
+        drawing.drawGraph(graph);
+        
+        List<Node> list_Noeud = graph.getNodes();
+        List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
+        ShortestPathData sPData = new ShortestPathData(graph,list_Noeud.get(67),list_Noeud.get(420),arcInspectors.get(0));
 
-        // TODO: create a path reader
-        try (final PathReader pathReader = null) {
+        DijkstraAlgorithm graphDij = new DijkstraAlgorithm(sPData);
+        ShortestPathSolution sPSol = graphDij.run();
 
-            // TODO: read the path
-            path = null;
+        path = sPSol.getPath();
+        drawing.drawPath(path);
+
+
+        /*  TODO: create a path reader
+        System.out.println("TESSSSSSSSSSSSST\n");
+        try (final PathReader pathReader = null) { baleck c pour comparer avec un fichier, faudra utiliser un binary
+
+            // TODO: read the path OK
+            path = pathReader.readPath(graph);
         }
+         System.out.println("TESSSSSSSSSSSSST1111111111111\n");
 
-        // TODO: draw the path on the drawing
+        // TODO: draw the path on the drawing Ok (pareil qu'au dessus)
+
+        drawing.drawGraph(graph); */
     }
 
 }
