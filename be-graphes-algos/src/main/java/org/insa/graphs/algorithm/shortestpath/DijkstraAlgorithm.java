@@ -42,7 +42,7 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         while (!tasLabel.isEmpty() && min.getSommet()!=data.getDestination() ){
             min = tasLabel.deleteMin();
             min.setMarque(true);
-            //notifyNodeMarked(min.getSommet());
+            //System.out.println("Cout du label Marqué :" + min.getCost() +"\n");
             for (Arc arc : min.getSommet().getSuccessors()){
                 if(data.isAllowed(arc)){
                     notifyNodeReached(arc.getDestination());
