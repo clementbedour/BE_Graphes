@@ -62,8 +62,10 @@ while (!tasLabel.isEmpty()) {
                 continue;
             }
             double nvCout = min.getCost() + data.getCost(arc);
+            // Dans AStarAlgorithm.java
             if (nvCout < recherche.getCost()) {
-                if (recherche.getCost() != Integer.MAX_VALUE) {
+                // On utilise la même valeur d'initialisation !
+                if (recherche.getCost() != Double.POSITIVE_INFINITY) { 
                     tasLabel.remove(recherche);
                 } else {
                     notifyNodeReached(arc.getDestination());
