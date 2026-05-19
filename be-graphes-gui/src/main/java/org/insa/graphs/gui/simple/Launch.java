@@ -1,30 +1,32 @@
 package org.insa.graphs.gui.simple;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.ObjectInputFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.insa.graphs.algorithm.ArcInspector;
-import org.insa.graphs.algorithm.AbstractSolution;
 import org.insa.graphs.algorithm.ArcInspectorFactory;
+import org.insa.graphs.algorithm.shortestpath.BellmanFordAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathSolution;
 import org.insa.graphs.gui.drawing.Drawing;
 import org.insa.graphs.gui.drawing.components.BasicDrawing;
+import org.insa.graphs.model.Arc;
 import org.insa.graphs.model.Graph;
-import org.insa.graphs.model.Path;
 import org.insa.graphs.model.Node;
+import org.insa.graphs.model.Path;
+import org.insa.graphs.model.Point;
 import org.insa.graphs.model.io.BinaryGraphReader;
 import org.insa.graphs.model.io.GraphReader;
-import org.insa.graphs.model.io.PathReader;
 
 public class Launch {
 
@@ -52,16 +54,14 @@ public class Launch {
     }
 
     public static void main(String[] args) throws Exception {
-
         // visit these directory to see the list of available files on commetud.
-        final String mapName =
-                "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/insa.mapgr";
-        final String pathName =
-                "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Paths/path_fr31insa_rangueil_r2.path";
+        final String mapName
+                = "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Maps/guadeloupe.mapgr";
+        final String pathName
+                = "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Paths/path_fr31insa_rangueil_r2.path";
 
         final Graph graph;
-        final Path path;
-
+        Path pathDij, pathBell;
         // create a graph reader
         try (final GraphReader reader = new BinaryGraphReader(new DataInputStream(
                 new BufferedInputStream(new FileInputStream(mapName))))) {
@@ -74,21 +74,120 @@ public class Launch {
         final Drawing drawing = createDrawing();
 
         // TODO: draw the graph on the drawing OK
-        
         drawing.drawGraph(graph);
-        
+
+        //chemin inexistant, chemin de longueur nulle, trajet court, trajet long
+        //List<String> resultatTest = new ArrayList<String>();
+        //resultatTest.add("INEXISTANT");
+        //resultatTest.add("NULLE");
+        //resultatTest.add("REUSSITE_C");
+        //resultatTest.add("REUSSITE_L");
         List<Node> list_Noeud = graph.getNodes();
-        List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
-        ShortestPathData sPData = new ShortestPathData(graph,list_Noeud.get(67),list_Noeud.get(420),arcInspectors.get(0));
+        List<Node> point = new ArrayList<>();
+        point.add(list_Noeud.get(15782)); //Debut inexistant
+        point.add(list_Noeud.get(19906)); //Fin inexistant
+        point.add(list_Noeud.get(15782));//Debut nulle
+        point.add(list_Noeud.get(15782));//Fin nulle
+        point.add(list_Noeud.get(12085));//Debut court
+        point.add(list_Noeud.get(11560));//Fin court
+        point.add(list_Noeud.get(11602));//Debut long
+        point.add(list_Noeud.get(11710));//Fin long
 
-        DijkstraAlgorithm graphDij = new DijkstraAlgorithm(sPData);
-        ShortestPathSolution sPSol = graphDij.run();
+        Node idOrigin;
+        Node idDestination;
+        int somme = 0;
 
-        path = sPSol.getPath();
-        drawing.drawPath(path);
+        for (int j = 0; j < 4; j++) {
+            idOrigin = point.get(2 * j);
+            idDestination = point.get((2 * j) + 1);
 
+            List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
+            ShortestPathData sPData = new ShortestPathData(graph, idOrigin, idDestination, arcInspectors.get(0));
 
-        /*  TODO: create a path reader
+            DijkstraAlgorithm graphDij = new DijkstraAlgorithm(sPData);
+            BellmanFordAlgorithm graphBell = new BellmanFordAlgorithm(sPData);
+
+            ShortestPathSolution dijSol = graphDij.run();
+            ShortestPathSolution bellSol = graphBell.run();
+
+            pathDij = dijSol.getPath();
+            pathBell = bellSol.getPath();
+            // J'ai le path de mes Bellman et de Dijkstra Il faut maintenant que je test si c OK
+
+            boolean result = true;
+
+            if (j == 0) {
+                if (pathBell == null && pathDij == null) {
+                    System.err.println("REUSSITE : Les points ne sont pas atteignables.\n");
+                    System.err.println("TEST numéro " + j + " réussis.\n");
+                    somme = somme + 1;
+                } else {
+                    System.err.println("ECHEC : Les points ne sont pas atteignables.\n");
+                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                }
+            } else {
+                List<Arc> arcDij = pathDij.getArcs();
+                if (j == 1) {
+                    if (arcDij.isEmpty()) {
+                        System.err.println("REUSSITE : Les points ne sont pas atteignables.\n");
+                        System.err.println("TEST numéro " + j + " réussis.\n");
+                        somme = somme + 1;
+                    } else {
+                        System.err.println("ECHEC : Les points ne sont pas atteignables.\n");
+                        System.err.println("TEST numéro " + j + " non réussis.\n");
+                    }
+                } else {
+                    List<Arc> arcBell = pathBell.getArcs();
+                    int tailleBell = arcBell.size();
+                    if (tailleBell != arcBell.size()) { //pas la même taille donc c tchao
+                        System.err.println("ECHEC : Les chemins ne font pas la même taille.\n");
+                        System.err.println("TEST numéro " + j + " non réussis.\n");
+                    } else {
+                        if (j == 2) {
+                            for (int i = 0; i < tailleBell; i++) {
+                                Node nodeBell = arcBell.get(i).getOrigin();
+                                Node nodeDij = arcDij.get(i).getOrigin();
+                                if (nodeBell.getId() != nodeDij.getId()) {
+                                    result = false;
+                                    System.err.println("ECHEC : Les chemins court ne sont pas identiques.\n");
+                                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                                    break;
+                                }
+                            }
+                            if (result == true) {
+                                System.err.println("REUSSITE : Le parcour de chemin court sont identiques.\n");
+                                System.err.println("TEST numéro " + j + " réussis.\n");
+                                somme = somme + 1;
+                            }
+                            result = true;
+                        }
+                        if (j == 3) {
+                            for (int i = 0; i < tailleBell; i++) {
+                                Node nodeBell = arcBell.get(i).getOrigin();
+                                Node nodeDij = arcDij.get(i).getOrigin();
+                                if (nodeBell.getId() != nodeDij.getId()) {
+                                    result = false;
+                                    System.err.println("ECHEC : Les chemins long ne sont pas identiques.\n");
+                                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                                    break;
+                                }
+                            }
+                            if (result == true) {
+                                System.err.println("REUSSITE : Le parcour de chemin long sont identiques.\n");
+                                System.err.println("TEST numéro " + j + " réussis.\n");
+                                somme = somme + 1;
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        System.err.println("GLOBAL : Le nombre total de test réussi est de " + somme);
+    }
+
+    /*  TODO: create a path reader
         System.out.println("TESSSSSSSSSSSSST\n");
         try (final PathReader pathReader = null) { baleck c pour comparer avec un fichier, faudra utiliser un binary
 
@@ -100,6 +199,4 @@ public class Launch {
         // TODO: draw the path on the drawing Ok (pareil qu'au dessus)
 
         drawing.drawGraph(graph); */
-    }
-
 }
