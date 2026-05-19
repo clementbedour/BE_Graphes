@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import org.insa.graphs.algorithm.ArcInspector;
 import org.insa.graphs.algorithm.ArcInspectorFactory;
 import org.insa.graphs.algorithm.shortestpath.BellmanFordAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.AStarAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathData;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathSolution;
@@ -61,7 +62,7 @@ public class Launch {
                 = "/mnt/commetud/3eme Annee MIC/Graphes-et-Algorithmes/Paths/path_fr31insa_rangueil_r2.path";
 
         final Graph graph;
-        Path pathDij, pathBell;
+        Path pathDij, pathBell,pathA;
         // create a graph reader
         try (final GraphReader reader = new BinaryGraphReader(new DataInputStream(
                 new BufferedInputStream(new FileInputStream(mapName))))) {
@@ -97,6 +98,9 @@ public class Launch {
         Node idDestination;
         int somme = 0;
 
+        System.err.println("----------------TEST ENTRE DIJKSTRA ET MOORE-BELLMAN-FORD---------------------.\n");
+
+        
         for (int j = 0; j < 4; j++) {
             idOrigin = point.get(2 * j);
             idDestination = point.get((2 * j) + 1);
@@ -165,6 +169,100 @@ public class Launch {
                             for (int i = 0; i < tailleBell; i++) {
                                 Node nodeBell = arcBell.get(i).getOrigin();
                                 Node nodeDij = arcDij.get(i).getOrigin();
+                                if (nodeBell.getId() != nodeDij.getId()) {
+                                    result = false;
+                                    System.err.println("ECHEC : Les chemins long ne sont pas identiques.\n");
+                                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                                    break;
+                                }
+                            }
+                            if (result == true) {
+                                System.err.println("REUSSITE : Le parcour de chemin long sont identiques.\n");
+                                System.err.println("TEST numéro " + j + " réussis.\n");
+                                somme = somme + 1;
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+        System.err.println("----------------TEST ENTRE A* ET MOORE-BELLMAN-FORD---------------------.\n");
+
+        
+        for (int j = 0; j < 4; j++) {
+            idOrigin = point.get(2 * j);
+            idDestination = point.get((2 * j) + 1);
+
+            List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
+            ShortestPathData sPData = new ShortestPathData(graph, idOrigin, idDestination, arcInspectors.get(0));
+
+            AStarAlgorithm graphA = new AStarAlgorithm(sPData);
+            BellmanFordAlgorithm graphBell = new BellmanFordAlgorithm(sPData);
+
+            ShortestPathSolution aSol = graphA.run();
+            ShortestPathSolution bellSol = graphBell.run();
+
+            pathA = aSol.getPath();
+            pathBell = bellSol.getPath();
+            // J'ai le path de mes Bellman et de Dijkstra Il faut maintenant que je test si c OK
+
+            boolean result = true;
+
+            if (j == 0) {
+                if (pathBell == null && pathA == null) {
+                    System.err.println("REUSSITE : Les points ne sont pas atteignables.\n");
+                    System.err.println("TEST numéro " + j + " réussis.\n");
+                    somme = somme + 1;
+                } else {
+                    System.err.println("ECHEC : Les points ne sont pas atteignables.\n");
+                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                }
+            } else {
+                List<Arc> arcA = pathA.getArcs();
+                if (j == 1) {
+                    if (arcA.isEmpty()) {
+                        System.err.println("REUSSITE : Les points ne sont pas atteignables.\n");
+                        System.err.println("TEST numéro " + j + " réussis.\n");
+                        somme = somme + 1;
+                    } else {
+                        System.err.println("ECHEC : Les points ne sont pas atteignables.\n");
+                        System.err.println("TEST numéro " + j + " non réussis.\n");
+                    }
+                } else {
+                    List<Arc> arcBell = pathBell.getArcs();
+                    int tailleBell = arcBell.size();
+                    if (tailleBell != arcBell.size()) { //pas la même taille donc c tchao
+                        System.err.println("ECHEC : Les chemins ne font pas la même taille.\n");
+                        System.err.println("TEST numéro " + j + " non réussis.\n");
+                    } else {
+                        if (j == 2) {
+                            for (int i = 0; i < tailleBell; i++) {
+                                Node nodeBell = arcBell.get(i).getOrigin();
+                                Node nodeA = arcA.get(i).getOrigin();
+                                if (nodeBell.getId() != nodeA.getId()) {
+                                    result = false;
+                                    System.err.println("ECHEC : Les chemins court ne sont pas identiques.\n");
+                                    System.err.println("TEST numéro " + j + " non réussis.\n");
+                                    break;
+                                }
+                            }
+                            if (result == true) {
+                                System.err.println("REUSSITE : Le parcour de chemin court sont identiques.\n");
+                                System.err.println("TEST numéro " + j + " réussis.\n");
+                                somme = somme + 1;
+                            }
+                            result = true;
+                        }
+                        if (j == 3) {
+                            for (int i = 0; i < tailleBell; i++) {
+                                Node nodeBell = arcBell.get(i).getOrigin();
+                                Node nodeDij = arcA.get(i).getOrigin();
                                 if (nodeBell.getId() != nodeDij.getId()) {
                                     result = false;
                                     System.err.println("ECHEC : Les chemins long ne sont pas identiques.\n");

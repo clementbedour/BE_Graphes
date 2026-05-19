@@ -1,4 +1,5 @@
 package org.insa.graphs.algorithm.shortestpath;
+
 import java.util.List;
 
 import org.insa.graphs.algorithm.AbstractSolution.Status;
@@ -28,22 +29,22 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         List<Node> nodes = data.getGraph().getNodes();
 
         notifyOriginProcessed(data.getOrigin());
-        for(int i = 0; i < taille; i++){
+        for (int i = 0; i < taille; i++) {
             Node noeudCourant = nodes.get(i);
             tabLabel[i] = new Label(noeudCourant, false, Integer.MAX_VALUE, null);
-            if (noeudCourant == data.getOrigin()){
+            if (noeudCourant == data.getOrigin()) {
                 tabLabel[i].setCost(0);
                 tasLabel.insert(tabLabel[i]);
             }
         }
         Label min;
         min = tasLabel.findMin();
-        while (!tasLabel.isEmpty() && min.getSommet()!=data.getDestination() ){
+        while (!tasLabel.isEmpty() && min.getSommet() != data.getDestination()) {
             min = tasLabel.deleteMin();
             min.setMarque(true);
             //System.out.println("Cout du label Marqué :" + min.getCost() +"\n");
-            for (Arc arc : min.getSommet().getSuccessors()){
-                if(data.isAllowed(arc)){
+            for (Arc arc : min.getSommet().getSuccessors()) {
+                if (data.isAllowed(arc)) {
                     notifyNodeReached(arc.getDestination());
                     Label recherche = tabLabel[arc.getDestination().getId()];
                     double nvCout = min.getCost() + data.getCost(arc);
@@ -51,17 +52,16 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
                         if (recherche.getCost() != Integer.MAX_VALUE) {
                             tasLabel.remove(recherche);
                         }
-                        recherche.setCost(nvCout); 
+                        recherche.setCost(nvCout);
                         recherche.setPere(arc);
                         tasLabel.insert(recherche);
-                        }
+                    }
                 }
             }
         }
-        
+
         Label destinationLabel = tabLabel[data.getDestination().getId()];
 
-    
         if (destinationLabel.getPere() == null && data.getOrigin() != data.getDestination()) {
             solution = new ShortestPathSolution(data, Status.INFEASIBLE);
         } else {
@@ -78,12 +78,9 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             solution = new ShortestPathSolution(data, Status.OPTIMAL, shortestPath);
         }
 
-
         // when the algorithm terminates, return the solution that has been found
         return solution;
 
     }
 
 }
-
-

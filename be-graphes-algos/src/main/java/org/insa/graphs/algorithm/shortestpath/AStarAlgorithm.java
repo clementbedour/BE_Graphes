@@ -1,4 +1,5 @@
 package org.insa.graphs.algorithm.shortestpath;
+
 import java.util.List;
 
 import org.insa.graphs.algorithm.AbstractInputData;
@@ -29,60 +30,59 @@ public class AStarAlgorithm extends DijkstraAlgorithm {
         List<Node> nodes = data.getGraph().getNodes();
         notifyOriginProcessed(data.getOrigin());
         // On récupère la vitesse max du graphe en m/s pour le calcul en temps
-double vitesseMax = 130.0 / 3.6; // Vitesse max par défaut (sur autoroute)
-if (data.getGraph().getGraphInformation().hasMaximumSpeed()) {
-    vitesseMax = data.getGraph().getGraphInformation().getMaximumSpeed() / 3.6;
-}
+        double vitesseMax = 130.0 / 3.6; // Vitesse max par défaut (sur autoroute)
+        if (data.getGraph().getGraphInformation().hasMaximumSpeed()) {
+            vitesseMax = data.getGraph().getGraphInformation().getMaximumSpeed() / 3.6;
+        }
 
-for (int i = 0; i < taille; i++) {
-    Node noeudCourant = nodes.get(i);
-    double distance = noeudCourant.getPoint().distanceTo(data.getDestination().getPoint());
-    double coutEstim = distance;
-    if (data.getMode() == AbstractInputData.Mode.TIME) {
-        coutEstim = distance / vitesseMax;
-    }
-    tabLabel[i] = new LabelStar(noeudCourant, false, Double.POSITIVE_INFINITY, null, coutEstim);
-    if (noeudCourant == data.getOrigin()) {
-        tabLabel[i].setCost(0);
-        tasLabel.insert(tabLabel[i]);
-    }
-}
-
-while (!tasLabel.isEmpty()) {
-    Label min = tasLabel.deleteMin();
-    if (min.getSommet() == data.getDestination()) {
-        break;
-    }
-    min.setMarque(true);
-    notifyNodeMarked(min.getSommet());
-    for (Arc arc : min.getSommet().getSuccessors()) {
-        if (data.isAllowed(arc)) {
-            LabelStar recherche = tabLabel[arc.getDestination().getId()]; 
-            if (recherche.getMarque()) {
-                continue;
+        for (int i = 0; i < taille; i++) {
+            Node noeudCourant = nodes.get(i);
+            double distance = noeudCourant.getPoint().distanceTo(data.getDestination().getPoint());
+            double coutEstim = distance;
+            if (data.getMode() == AbstractInputData.Mode.TIME) {
+                coutEstim = distance / vitesseMax;
             }
-            double nvCout = min.getCost() + data.getCost(arc);
-            // Dans AStarAlgorithm.java
-            if (nvCout < recherche.getCost()) {
-                // On utilise la même valeur d'initialisation !
-                if (recherche.getCost() != Double.POSITIVE_INFINITY) { 
-                    tasLabel.remove(recherche);
-                } else {
-                    notifyNodeReached(arc.getDestination());
-                }
-                recherche.setCost(nvCout);
-                recherche.setPere(arc);
-                tasLabel.insert(recherche);
+            tabLabel[i] = new LabelStar(noeudCourant, false, Double.POSITIVE_INFINITY, null, coutEstim);
+            if (noeudCourant == data.getOrigin()) {
+                tabLabel[i].setCost(0);
+                tasLabel.insert(tabLabel[i]);
             }
         }
-    }
-}
+
+        while (!tasLabel.isEmpty()) {
+            Label min = tasLabel.deleteMin();
+            if (min.getSommet() == data.getDestination()) {
+                break;
+            }
+            min.setMarque(true);
+            notifyNodeMarked(min.getSommet());
+            for (Arc arc : min.getSommet().getSuccessors()) {
+                if (data.isAllowed(arc)) {
+                    LabelStar recherche = tabLabel[arc.getDestination().getId()];
+                    if (recherche.getMarque()) {
+                        continue;
+                    }
+                    double nvCout = min.getCost() + data.getCost(arc);
+                    // Dans AStarAlgorithm.java
+                    if (nvCout < recherche.getCost()) {
+                        // On utilise la même valeur d'initialisation !
+                        if (recherche.getCost() != Double.POSITIVE_INFINITY) {
+                            tasLabel.remove(recherche);
+                        } else {
+                            notifyNodeReached(arc.getDestination());
+                        }
+                        recherche.setCost(nvCout);
+                        recherche.setPere(arc);
+                        tasLabel.insert(recherche);
+                    }
+                }
+            }
+        }
         Label destinationLabel = tabLabel[data.getDestination().getId()];
         if (destinationLabel.getPere() == null
                 && data.getOrigin() != data.getDestination()) {
             solution = new ShortestPathSolution(data, Status.INFEASIBLE);
-        }
-        else {
+        } else {
             notifyDestinationReached(data.getDestination());
             java.util.ArrayList<Arc> arcs = new java.util.ArrayList<>();
             Arc arcActuel = destinationLabel.getPere();
@@ -98,5 +98,5 @@ while (!tasLabel.isEmpty()) {
 
         // when the algorithm terminates, return the solution that has been found  
         return solution;
-}
+    }
 }
