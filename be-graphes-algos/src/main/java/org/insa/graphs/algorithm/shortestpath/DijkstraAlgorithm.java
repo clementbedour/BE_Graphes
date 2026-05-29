@@ -10,8 +10,20 @@ import org.insa.graphs.model.Path;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
+    int taille;
+    List<Node> nodes;
+
+
     public DijkstraAlgorithm(ShortestPathData data) {
         super(data);
+        taille = data.getGraph().size();
+        nodes = data.getGraph().getNodes();
+    }
+
+    public DijkstraAlgorithm(ShortestPathData data,List<Node> List) {
+        super(data);
+        taille = List.size();
+        nodes = List;
     }
 
     @Override
@@ -23,10 +35,8 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
         ShortestPathSolution solution = null;
 
         // TODO: implement the Dijkstra algorithm
-        int taille = data.getGraph().size();
         Label[] tabLabel = new Label[taille]; // On enlève le -1 !
         BinaryHeap<Label> tasLabel = new BinaryHeap<>();
-        List<Node> nodes = data.getGraph().getNodes();
 
         notifyOriginProcessed(data.getOrigin());
         for (int i = 0; i < taille; i++) {
