@@ -1,6 +1,5 @@
 package org.insa.graphs.algorithm.shortestpath;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -17,10 +16,10 @@ public class Ecart extends ShortestPathAlgorithm {
     public Ecart(ShortestPathData data) {
         super(data);
     }
-
     @Override
     protected ShortestPathSolution doRun() {
         final ShortestPathData data = getInputData();
+        System.out.println("Test Ecart");
         
         double tolerance = 1.2;
         
@@ -41,7 +40,9 @@ public class Ecart extends ShortestPathAlgorithm {
         List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
         ShortestPathData sPData = new ShortestPathData(data.getGraph(), data.getOrigin(), data.getDestination(), arcInspectors.get(0));
         DijkstraAlgorithm graphDij = new DijkstraAlgorithm(sPData);
+        System.out.println("Test Dij1 debut");
         ShortestPathSolution dijSol = graphDij.run();
+        System.out.println("Test Dij1 fin");
         
         // Si aucun chemin de base n'existe, on s'arrête là
         if (!dijSol.isFeasible()) {
@@ -63,35 +64,37 @@ public class Ecart extends ShortestPathAlgorithm {
         ShortestPathSolution bestSolution = dijSol; // Par défaut, la solution est le chemin normal
         int debut = 0;
         int fin = taille - 1;
-
+        double frequence = 0;
+        int[] carteFreq = new int[taille];
+        for (int i = 0; i < taille; i++) {
+            Node node = tabNodes.get(i);
+            carteFreq[node.getId()] = node.getNumberOfSuccessors(); 
+        }
         while (debut <= fin) {
             int milieu = (debut + fin) / 2;
-            List<Node> sommetsAutorises = new ArrayList<>();
-            for(int indice = 0; indice <= milieu; indice++){
-                sommetsAutorises.add(tabfreq[indice].getNode());
-            }
-            if (!sommetsAutorises.contains(data.getOrigin())) sommetsAutorises.add(data.getOrigin());
-            if (!sommetsAutorises.contains(data.getDestination())) sommetsAutorises.add(data.getDestination());
-            DijkstraAlgorithm nvGraphDij = new DijkstraAlgorithm(sPData, sommetsAutorises);
+            
+            // On récupère la valeur du seuil qu'on teste actuellement
+            int seuilTest = tabfreq[milieu].getFrequentation();
+            
+            // On lance le nouveau Dijkstra avec la carte et le seuil !
+            DijkstraAlgorithm nvGraphDij = new DijkstraAlgorithm(data, carteFreq, seuilTest);
             ShortestPathSolution nvDijSol = nvGraphDij.run();
+            
             if (nvDijSol.isFeasible()) {
-                double nvCout;
-                if (data.getMode() == AbstractInputData.Mode.TIME) {
-                    nvCout = nvDijSol.getPath().getMinimumTravelTime();
-                } else {
-                    nvCout = nvDijSol.getPath().getLength();
-                }
+                double nvCout = (data.getMode() == AbstractInputData.Mode.TIME) 
+                                ? nvDijSol.getPath().getMinimumTravelTime() 
+                                : nvDijSol.getPath().getLength();
+                
                 if (nvCout <= coutMaxAutorise) {
                     bestSolution = nvDijSol;
-                    fin = milieu - 1;
+                    fin = milieu - 1; // On essaie d'être encore plus strict sur la fréquentation
                 } else {
-                    debut = milieu + 1;
+                    debut = milieu + 1; // Trajet trop long, on doit relâcher le seuil
                 }
             } else {      
-                debut = milieu + 1;
+                debut = milieu + 1; // Trajet impossible, on doit relâcher le seuil
             }
         }
-        
-        return bestSolution;    
-    }
+        return bestSolution;
+}
 }

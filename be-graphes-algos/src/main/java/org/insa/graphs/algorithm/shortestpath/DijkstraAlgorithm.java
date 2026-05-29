@@ -1,7 +1,5 @@
 package org.insa.graphs.algorithm.shortestpath;
 
-import java.util.List;
-
 import org.insa.graphs.algorithm.AbstractSolution.Status;
 import org.insa.graphs.algorithm.utils.BinaryHeap;
 import org.insa.graphs.model.Arc;
@@ -10,67 +8,80 @@ import org.insa.graphs.model.Path;
 
 public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
-    int taille;
-    List<Node> nodes;
+    private int[] carteFrequentation = null;
+    private int seuilMax = -1;
+    private boolean modeFiltrage = false;
 
-
+    // 1er Constru (de base)
     public DijkstraAlgorithm(ShortestPathData data) {
         super(data);
-        this.taille = data.getGraph().size();
-        this.nodes = data.getGraph().getNodes();
+        this.modeFiltrage = false;
     }
 
-    public DijkstraAlgorithm(ShortestPathData data,List<Node> List) {
+    // 2eme Constru pour la freq
+    public DijkstraAlgorithm(ShortestPathData data, int[] frequentations, int seuilMax) {
         super(data);
-        this.taille = List.size();
-        this.nodes = List;
+        this.carteFrequentation = frequentations;
+        this.seuilMax = seuilMax;
+        this.modeFiltrage = true;
     }
 
     @Override
     protected ShortestPathSolution doRun() {
-        // retrieve data from the input problem (getInputData() is inherited from the
-        // parent class ShortestPathAlgorithm)
         final ShortestPathData data = getInputData();
-        // variable that will contain the solution of the shortest path problem
-        ShortestPathSolution solution = null;
-
-        // TODO: implement the Dijkstra algorithm
-        Label[] tabLabel = new Label[taille]; // On enlève le -1 !
+        int taille = data.getGraph().size();
+        Label[] tabLabel = new Label[taille];
         BinaryHeap<Label> tasLabel = new BinaryHeap<>();
 
         notifyOriginProcessed(data.getOrigin());
-        for (int i = 0; i < taille; i++) {
-            Node noeudCourant = nodes.get(i);
-            tabLabel[i] = new Label(noeudCourant, false, Integer.MAX_VALUE, null);
+        for (Node noeudCourant : data.getGraph().getNodes()) {
+            tabLabel[noeudCourant.getId()] = new Label(noeudCourant, false, Double.POSITIVE_INFINITY, null);
             if (noeudCourant == data.getOrigin()) {
-                tabLabel[i].setCost(0);
-                tasLabel.insert(tabLabel[i]);
+                tabLabel[noeudCourant.getId()].setCost(0);
+                tasLabel.insert(tabLabel[noeudCourant.getId()]);
             }
         }
-        Label min;
-        min = tasLabel.findMin();
-        while (!tasLabel.isEmpty() && min.getSommet() != data.getDestination()) {
-            min = tasLabel.deleteMin();
-            min.setMarque(true);
-            //System.out.println("Cout du label Marqué :" + min.getCost() +"\n");
+
+        while (!tasLabel.isEmpty()) {
+            Label min = tasLabel.deleteMin();
+            if (min.getSommet() == data.getDestination()) {
+                break; 
+            }
+            min.setMarque(true);      
             for (Arc arc : min.getSommet().getSuccessors()) {
                 if (data.isAllowed(arc)) {
-                    notifyNodeReached(arc.getDestination());
-                    Label recherche = tabLabel[arc.getDestination().getId()];
-                    double nvCout = min.getCost() + data.getCost(arc);
-                    if (nvCout < recherche.getCost()) {
-                        if (recherche.getCost() != Integer.MAX_VALUE) {
-                            tasLabel.remove(recherche);
+                    Node destination = arc.getDestination();
+
+                    // Changement
+                    if (modeFiltrage) {
+                        if (destination != data.getDestination() && destination != data.getOrigin()) {
+                            if (carteFrequentation[destination.getId()] > seuilMax) {
+                                continue; 
+                            }
                         }
-                        recherche.setCost(nvCout);
-                        recherche.setPere(arc);
-                        tasLabel.insert(recherche);
+                    }
+
+                    Label recherche = tabLabel[destination.getId()];
+                    if (!recherche.getMarque()) {
+                        double nvCout = min.getCost() + data.getCost(arc);
+                        
+                        if (nvCout < recherche.getCost()) {
+                            if (recherche.getCost() != Double.POSITIVE_INFINITY) {
+                                tasLabel.remove(recherche);
+                            } else {
+                                notifyNodeReached(destination);
+                            }
+                            recherche.setCost(nvCout);
+                            recherche.setPere(arc);
+                            tasLabel.insert(recherche);
+                        }
                     }
                 }
             }
         }
 
         Label destinationLabel = tabLabel[data.getDestination().getId()];
+        ShortestPathSolution solution = null;
 
         if (destinationLabel.getPere() == null && data.getOrigin() != data.getDestination()) {
             solution = new ShortestPathSolution(data, Status.INFEASIBLE);
@@ -88,9 +99,6 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
             solution = new ShortestPathSolution(data, Status.OPTIMAL, shortestPath);
         }
 
-        // when the algorithm terminates, return the solution that has been found
         return solution;
-
     }
-
 }
