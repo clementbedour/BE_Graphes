@@ -1,5 +1,4 @@
 package org.insa.graphs.algorithm.shortestpath;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -9,8 +8,6 @@ import org.insa.graphs.algorithm.ArcInspectorFactory;
 import org.insa.graphs.model.Graph;
 import org.insa.graphs.model.Node;
 import org.insa.graphs.model.Path;
-
-import jdk.jfr.Frequency;
 
 
 public class Ecart extends ShortestPathAlgorithm {
@@ -28,35 +25,49 @@ public class Ecart extends ShortestPathAlgorithm {
         List<Node> tabNodes = data.getGraph().getNodes();
         int taille = tabNodes.size();
         Frequentation[] tabfreq = new Frequentation[taille];
-        for(int i = 0; i < taille; i++){
+        int debut = 0;
+        for(int i = debut; i < taille; i++){
             Node node = tabNodes.get(i);
             Frequentation frequ = new Frequentation(node);
             tabfreq[i] = frequ;
         }
         Arrays.sort(tabfreq, Comparator.comparingInt(Frequentation::getFrequentation));
-        int seuil = 1; // A changer par une valeur qui sera donnée par l'utilisateur
-        Path pathDij;
+        double seuil = 0; // A changer par une valeur qui sera donnée par l'utilisateur
+        Path solutionFinal;
         List<ArcInspector> arcInspectors = ArcInspectorFactory.getAllFilters();
         ShortestPathData sPData = new ShortestPathData(data.getGraph(), data.getOrigin(), data.getDestination(), arcInspectors.get(0));
         DijkstraAlgorithm graphDij = new DijkstraAlgorithm(sPData);
         ShortestPathSolution dijSol = graphDij.run();
-        Duration temps = dijSol.getSolvingTime();
-        pathDij = dijSol.getPath();
+        Path pathDij = dijSol.getPath();
+        double tempsMin = pathDij.getMinimumTravelTime();
         int milieu = taille/2;
+
         Graph graphe_prov = data.getGraph();
         while (tabNodes.size() != 0) {
-            for(int i = milieu +1; i < taille; i++){
-            Node node = tabfreq[i].getSommet();
-            graphe_prov.
-            tabfreq[i] = frequ;
+            milieu = (debut + taille)/2;
+            DijkstraAlgorithmV2 nvGraphDij = new DijkstraAlgorithmV2(sPData, tabNodes);
+            ShortestPathSolution nvDijSol = nvGraphDij.run();
+            Path nvPathDij = dijSol.getPath();
+            double nvTemps = nvPathDij.getMinimumTravelTime();
+            if (nvTemps <= tempsMin + seuil){
+                solution = nvDijSol;
+                for(int indice = 0; indice < milieu +1; indice++){
+                    tabNodes.remove(indice);
+                }
+                taille = taille/2;
+            }
+            else{
+                for(int indice = milieu + 1; indice < taille; indice++){
+                    tabNodes.remove(indice);
+                }
+                debut = milieu + 1;
+                taille = taille / 2;
+            }
+
         }
-            
+        return solution;    
         }
         // when the algorithm terminates, return the solution that has been found
-        return solution;
 
     }
-
-}
-
 
