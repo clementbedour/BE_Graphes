@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.insa.graphs.algorithm.shortestpath.AStarAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.BellmanFordAlgorithm;
 import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithm;
+import org.insa.graphs.algorithm.shortestpath.DijkstraAlgorithmV2;
 import org.insa.graphs.algorithm.shortestpath.ShortestPathAlgorithm;
 import org.insa.graphs.algorithm.weakconnectivity.WeaklyConnectedComponentsAlgorithm;
 
@@ -34,6 +35,9 @@ public class AlgorithmFactory {
         registerAlgorithm(ShortestPathAlgorithm.class, "Dijkstra",
                 DijkstraAlgorithm.class);
         registerAlgorithm(ShortestPathAlgorithm.class, "A*", AStarAlgorithm.class);
+
+        //ajout à la main
+        registerAlgorithm(ShortestPathAlgorithm.class, "Dijkstra-V2", DijkstraAlgorithmV2.class);
 
         // Register your algorithms here:
         // registerAlgorithm(CarPoolingAlgorithm.class, "My Awesome Algorithm",
