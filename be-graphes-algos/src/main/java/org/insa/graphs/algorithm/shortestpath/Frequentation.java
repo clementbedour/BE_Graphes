@@ -12,7 +12,7 @@ public class Frequentation{
 
     }
 
-    public Node getSommet() {
+    public Node getNode() {
         return this.sommetCourant;
     }
 

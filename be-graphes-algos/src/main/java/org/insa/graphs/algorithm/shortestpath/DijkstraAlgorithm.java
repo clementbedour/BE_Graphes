@@ -16,14 +16,14 @@ public class DijkstraAlgorithm extends ShortestPathAlgorithm {
 
     public DijkstraAlgorithm(ShortestPathData data) {
         super(data);
-        taille = data.getGraph().size();
-        nodes = data.getGraph().getNodes();
+        this.taille = data.getGraph().size();
+        this.nodes = data.getGraph().getNodes();
     }
 
     public DijkstraAlgorithm(ShortestPathData data,List<Node> List) {
         super(data);
-        taille = List.size();
-        nodes = List;
+        this.taille = List.size();
+        this.nodes = List;
     }
 
     @Override
